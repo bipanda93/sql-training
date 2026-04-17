@@ -90,3 +90,58 @@ WHERE cc.contactid IN (SELECT contactid FROM i)
 ORDER BY cc.nom;
 
 -- Règle : préférer NOT EXISTS à NOT IN en production
+
+
+-- ------------------------------------------------------------
+-- 5.6 EXISTS + NOT EXISTS combinés
+-- Objectif : contacts inscrits en 2019 mais PAS en 2020
+-- ------------------------------------------------------------
+SELECT COUNT(*) AS nb_contacts
+FROM contact.contact cc
+WHERE EXISTS (
+    SELECT *
+    FROM inscription.inscription ii
+    JOIN stage.session ss ON ss.sessionid = ii.sessionid
+    WHERE EXTRACT(YEAR FROM ss.datedebut) = 2019
+    AND ii.contactid = cc.contactid
+)
+AND NOT EXISTS (
+    SELECT *
+    FROM inscription.inscription ii
+    JOIN stage.session ss ON ss.sessionid = ii.sessionid
+    WHERE EXTRACT(YEAR FROM ss.datedebut) = 2020
+    AND ii.contactid = cc.contactid
+);
+
+
+-- ------------------------------------------------------------
+-- 5.7 CTE RECURSIVE — Hiérarchie employé / chef
+-- Objectif : parcourir l'arbre hiérarchique depuis l'employé 1
+-- Note     : RECURSIVE obligatoire sur PostgreSQL
+-- ------------------------------------------------------------
+WITH RECURSIVE cte AS (
+
+    -- Ancre : point de départ
+    SELECT
+        e1.employeid,
+        e1.nom,
+        e1.chefid,
+        0 AS niveau
+    FROM public.employe e1
+    WHERE e1.employeid = 1
+
+    UNION ALL
+
+    -- Récursion : descendre d'un niveau à chaque itération
+    SELECT
+        e2.employeid,
+        e2.nom,
+        e2.chefid,
+        cte.niveau + 1
+    FROM public.employe e2
+    JOIN cte ON cte.employeid = e2.chefid
+    WHERE cte.niveau < 10       -- sécurité anti boucle infinie
+)
+SELECT *
+FROM cte
+ORDER BY niveau, nom;

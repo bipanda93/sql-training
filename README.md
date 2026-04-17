@@ -62,6 +62,10 @@ Ouvre les fichiers `.sql` dans pgAdmin ou DBeaver et exécute-les sur ta base Po
 - [x] Agrégations (GROUP BY, ROLLUP)
 - [x] Window Functions (RANK, ROW_NUMBER, SUM OVER)
 - [x] Sous-requêtes et CTEs
+- [x] Transactions (BEGIN, COMMIT, ROLLBACK)
+- [x] DELETE, CREATE TABLE AS
+- [x] MERGE (upsert)
+- [x] CTE Récursive
 - [ ] Index et optimisation
 - [ ] Procédures stockées
 - [ ] Triggers
